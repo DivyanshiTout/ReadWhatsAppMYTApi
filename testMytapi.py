@@ -90,6 +90,28 @@ def webhook():
     return jsonify({"status": "received"}), 200
 
 
+@app.route('/messages', methods=['GET'])
+def get_all_messages():
+    output_folder = "messages"
+    all_messages = []
+
+    if not os.path.exists(output_folder):
+        return jsonify({"messages": [], "note": "No messages folder found"}), 200
+
+    for filename in os.listdir(output_folder):
+        if filename.endswith(".json"):
+            file_path = os.path.join(output_folder, filename)
+            with open(file_path, "r", encoding="utf-8") as f:
+                try:
+                    data = json.load(f)
+                    all_messages.extend(data)
+                except json.JSONDecodeError:
+                    print(f"⚠️ Could not decode JSON in file: {file_path}")
+
+    return jsonify({"messages": all_messages}), 200
+
+
+
 def save_message(conversation_name, message_data):
     output_folder = "messages"
     os.makedirs(output_folder, exist_ok=True)
